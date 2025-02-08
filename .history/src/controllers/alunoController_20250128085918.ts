@@ -1,0 +1,30 @@
+import { FastifyReply, FastifyRequest } from 'fastify';
+import { connectMySQL } from '../db'; // Usando a conexão compartilhada
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
