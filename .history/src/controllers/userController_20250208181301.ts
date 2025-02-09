@@ -105,9 +105,9 @@ export async function login(request: FastifyRequest, reply: FastifyReply) {
     const { senha: _, ...userWithoutPassword } = user;
 
     // Definir para qual tela redirecionar
-    let redirectTo = '/dashboardAluno.html';
+    let redirectTo = '/dashboard';
     if (user.tipo_usuario === 'Assistente') {
-      redirectTo = '//dashboardAssistente.html';
+      redirectTo = '/dashboard-assistente';
     }
 
     return reply.status(200).send({

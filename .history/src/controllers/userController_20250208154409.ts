@@ -73,51 +73,29 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     return reply.status(500).send({ message: 'Erro interno ao cadastrar usuário' });
   }
 }
+yRequest, reply: FastifyReply) {
 
-export async function login(request: FastifyRequest, reply: FastifyReply) {
-  try {
-    const connection = await connectMySQL();
-    const { identificador, senha } = request.body as { identificador: string; senha: string };
+;
+t.body as { identificador: string; senha: string };
 
-    if (!identificador || !senha) {
-      return reply.status(400).send({ message: 'Identificador e senha são obrigatórios' });
-    }
+ge: 'Identificador e senha são obrigatórios' });
 
-    const [userRows] = await connection.execute(
-      `SELECT id, nome_completo, matricula, senha, email, tipo_usuario FROM users WHERE matricula = ? OR email = ?`,
-      [identificador, identificador]
-    );
+cute(
+ senha, email, tipo_usuario FROM users WHERE matricula = ? OR email = ?`,
 
-    const user = (userRows as RowDataPacket[])[0];
 
-    if (!user) {
-      return reply.status(404).send({ message: 'Usuário não encontrado' });
-    }
+[])[0];
 
-    const isPasswordValid = await bcrypt.compare(senha, user.senha);
-    if (!isPasswordValid) {
-      return reply.status(401).send({ message: 'Senha incorreta' });
-    }
+ge: 'Usuário não encontrado' });
 
-    // Atualiza o campo `ultimo_login`
-    await connection.execute('UPDATE users SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+mpare(senha, user.senha);
 
-    const { senha: _, ...userWithoutPassword } = user;
+ge: 'Senha incorreta' });
 
-    // Definir para qual tela redirecionar
-    let redirectTo = '/dashboardAluno.html';
-    if (user.tipo_usuario === 'Assistente') {
-      redirectTo = '//dashboardAssistente.html';
-    }
 
-    return reply.status(200).send({
-      message: 'Login realizado com sucesso',
-      user: userWithoutPassword,
-      redirectTo
-    });
+SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+d } = user;
+: 'Login realizado com sucesso', user: userWithoutPassword });
 
-  } catch (error) {
-    console.error('Erro ao realizar login:', error);
-    return reply.status(500).send({ message: 'Erro interno ao realizar login' });
-  }
-}
+, error);
+: 'Erro interno ao realizar login' });

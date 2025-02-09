@@ -73,7 +73,6 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
     return reply.status(500).send({ message: 'Erro interno ao cadastrar usuário' });
   }
 }
-
 export async function login(request: FastifyRequest, reply: FastifyReply) {
   try {
     const connection = await connectMySQL();
@@ -103,21 +102,8 @@ export async function login(request: FastifyRequest, reply: FastifyReply) {
     await connection.execute('UPDATE users SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
 
     const { senha: _, ...userWithoutPassword } = user;
-
-    // Definir para qual tela redirecionar
-    let redirectTo = '/dashboardAluno.html';
-    if (user.tipo_usuario === 'Assistente') {
-      redirectTo = '//dashboardAssistente.html';
-    }
-
-    return reply.status(200).send({
-      message: 'Login realizado com sucesso',
-      user: userWithoutPassword,
-      redirectTo
-    });
-
+    return reply.status(200).send({ message: 'Login realizado com sucesso', user: userWithoutPassword });
   } catch (error) {
     console.error('Erro ao realizar login:', error);
     return reply.status(500).send({ message: 'Erro interno ao realizar login' });
-  }
-}
+  }}

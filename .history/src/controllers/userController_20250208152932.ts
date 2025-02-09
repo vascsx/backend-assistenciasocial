@@ -36,7 +36,7 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       return reply.status(400).send({ message: 'A matrícula deve conter apenas números' });
     }
 
-    let tipoUsuario: 'Usuário' | 'Assistente';
+    let tipoUsuario = '';
     if (email.endsWith('@ufc.br')) {
       tipoUsuario = 'Assistente';
     } else if (email.endsWith('@alu.ufc.br')) {
@@ -45,20 +45,10 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       return reply.status(403).send({ message: 'Permitido somente cadastro com email Institucional' });
     }
 
-    // Verifica se já existe um usuário com o mesmo email ou matrícula
-    const [existingUsers] = await connection.execute(
-      'SELECT id FROM users WHERE email = ? OR matricula = ?',
-      [email, matricula]
-    );
-
-    if ((existingUsers as RowDataPacket[]).length > 0) {
-      return reply.status(409).send({ message: 'Email ou matrícula já cadastrados' });
-    }
-
     const hashedPassword = await bcrypt.hash(senha, 10);
     const [result] = await connection.execute(
-      'INSERT INTO users (nome_completo, matricula, email, senha, tipo_usuario) VALUES (?, ?, ?, ?, ?)',
-      [nomeCompleto, matricula, email, hashedPassword, tipoUsuario]
+      'INSERT INTO users (nomeCompleto, matricula, curso, senha, email) VALUES (?, ?, ?, ?, ?)',
+      [nomeCompleto, matricula, tipoUsuario, hashedPassword, email]
     );
 
     return reply.status(201).send({
@@ -84,7 +74,7 @@ export async function login(request: FastifyRequest, reply: FastifyReply) {
     }
 
     const [userRows] = await connection.execute(
-      `SELECT id, nome_completo, matricula, senha, email, tipo_usuario FROM users WHERE matricula = ? OR email = ?`,
+      `SELECT id, nomeCompleto, matricula, senha, email, curso FROM users WHERE matricula = ? OR email = ?`,
       [identificador, identificador]
     );
 
@@ -99,23 +89,8 @@ export async function login(request: FastifyRequest, reply: FastifyReply) {
       return reply.status(401).send({ message: 'Senha incorreta' });
     }
 
-    // Atualiza o campo `ultimo_login`
-    await connection.execute('UPDATE users SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
-
     const { senha: _, ...userWithoutPassword } = user;
-
-    // Definir para qual tela redirecionar
-    let redirectTo = '/dashboardAluno.html';
-    if (user.tipo_usuario === 'Assistente') {
-      redirectTo = '//dashboardAssistente.html';
-    }
-
-    return reply.status(200).send({
-      message: 'Login realizado com sucesso',
-      user: userWithoutPassword,
-      redirectTo
-    });
-
+    return reply.status(200).send({ message: 'Login realizado com sucesso', user: userWithoutPassword });
   } catch (error) {
     console.error('Erro ao realizar login:', error);
     return reply.status(500).send({ message: 'Erro interno ao realizar login' });
